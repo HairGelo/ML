@@ -114,7 +114,7 @@ model.add(Flatten())
 # Fully connected layer
 model.add(Dense(128, activation='relu'))
 # Output layer — 5 classes (bicycle, table, telephone, plates, house)
-model.add(Dense(len(TARGET_FINE_CLASSES), activation='softmax'))
+model.add(Dense(len(SUPERCLASS_MAP, activation='softmax')))
 model.summary()
 
 # 9.) Compile the model
