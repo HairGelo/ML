@@ -4,8 +4,13 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dens
 import numpy as np
 import os
 import sys
+import random
 import matplotlib.pyplot as plt
 import pandas as pd
+
+random.seed(500)
+np.random.seed(500)
+tf.random.set_seed(500)
 
 # ================ DATA PREPARATION STAGE ========================== #
 # 1.) Load data
@@ -96,9 +101,9 @@ for i in range(5):
     plt.imshow(test_images[idx])
     plt.xlabel(class_names[i])
 plt.suptitle('One sample per class')
-plt.show()
+plt.show(block=False)
+plt.pause(0.1)
 
-# ================ MODEL BUILDING STAGE ========================== #
 # 8.) Normalize images to [0, 1] range
 train_images = train_images / 255.0
 test_images  = test_images  / 255.0
@@ -137,7 +142,7 @@ plt.title('Training vs Validation Loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
-plt.show()
+plt.show(block=False)
 
 # 13.) Evaluate on test set
 str_class = ['bicycle', 'table', 'telephone', 'plates', 'house']
@@ -154,5 +159,38 @@ max_prob_idx = np.argmax(classification[0])
 print('Predicted class: {} -- {}'.format(max_prob_idx, str_class[max_prob_idx]))
 idx = test_labels[0]
 print('True class: {} -- {}'.format(idx, str_class[idx]))
+
+# 15.) Test with a custom external image
+from tensorflow.keras.preprocessing import image as keras_image
+
+def predict_custom_image(img_path):
+    str_class = ['bicycle', 'table', 'telephone', 'plates', 'house']
+    
+    img = keras_image.load_img(img_path, target_size=(32, 32))
+    img_array = keras_image.img_to_array(img) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+    
+    prediction = model.predict(img_array)
+    predicted_idx = np.argmax(prediction[0])
+    confidence = prediction[0][predicted_idx] * 100
+    
+    # Display image and bar chart side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+    
+    # Left: show the image
+    ax1.imshow(keras_image.load_img(img_path))
+    ax1.axis('off')
+    ax1.set_title(f'Predicted: {str_class[predicted_idx]} ({confidence:.1f}%)')
+    
+    # Right: horizontal bar chart of confidence per class
+    ax2.barh(str_class, prediction[0] * 100, color='steelblue')
+    ax2.set_xlabel('Confidence (%)')
+    ax2.set_title('Class Probabilities')
+    ax2.set_xlim(0, 100)
+    
+    plt.tight_layout()
+    plt.show(block=False)
+
+predict_custom_image('C:\\Users\\shink\\OneDrive\\Desktop\\coding\\CPE3204\\ML\\test3.jpg')
 
 input("Press Enter to exit...")
