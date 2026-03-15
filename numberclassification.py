@@ -135,7 +135,6 @@ loss     = metricInfo.history['loss']
 val_loss = metricInfo.history['val_loss']
 epochs   = range(1, len(loss) + 1)
 
-plt.clf()
 plt.plot(epochs, loss, 'g-', label="Training loss")
 plt.plot(epochs, val_loss, 'b-', label='Validation loss')
 plt.title('Training vs Validation Loss')
