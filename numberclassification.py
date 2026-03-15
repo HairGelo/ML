@@ -20,11 +20,11 @@ fine_TsLabels   = fine_TsLabels.flatten()
 # 2.) Define superclass → specific fine class name to extract
 # Each superclass has 5 fine classes; we only want 1 from each
 SUPERCLASS_MAP = {
-    'bicycle':   19,   # vehicles 1
-    'table':      8,   # household furniture
+    'bicycle':   18,   # vehicles 1
+    'table':      6,   # household furniture
     'telephone':  5,   # household electrical devices
     'plates':     3,   # food containers
-    'house':     10,   # large man-made outdoor things
+    'house':     9,   # large man-made outdoor things
 }
 
 # 3.) For each superclass, extract ONLY the one fine class we want
@@ -99,11 +99,11 @@ plt.suptitle('One sample per class')
 plt.show()
 
 # ================ MODEL BUILDING STAGE ========================== #
-# 7.) Normalize images to [0, 1] range
+# 8.) Normalize images to [0, 1] range
 train_images = train_images / 255.0
 test_images  = test_images  / 255.0
 
-# 8.) Build the model
+# 9.) Build the model
 model = tf.keras.Sequential()
 # 32 convolution filters each of size 3x3
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(32, 32, 3)))
@@ -114,18 +114,18 @@ model.add(Flatten())
 # Fully connected layer
 model.add(Dense(128, activation='relu'))
 # Output layer — 5 classes (bicycle, table, telephone, plates, house)
-model.add(Dense(len(SUPERCLASS_MAP, activation='softmax')))
+model.add(Dense(len(SUPERCLASS_MAP), activation='softmax'))
 model.summary()
 
-# 9.) Compile the model
+# 10.) Compile the model
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
-# 10.) Train the model
+# 11.) Train the model
 metricInfo = model.fit(train_images, train_labels, epochs=10, validation_split=0.1)
 
-# 11.) Plot Training vs Validation Loss
+# 12.) Plot Training vs Validation Loss
 loss     = metricInfo.history['loss']
 val_loss = metricInfo.history['val_loss']
 epochs   = range(1, len(loss) + 1)
@@ -139,9 +139,20 @@ plt.ylabel('Loss')
 plt.legend()
 plt.show()
 
-# 12.) Evaluate on test set
-test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
-print(f'\nTest Accuracy: {test_acc:.4f}')
-print(f'Test Loss:     {test_loss:.4f}')
+# 13.) Evaluate on test set
+str_class = ['bicycle', 'table', 'telephone', 'plates', 'house']
+print(test_images.shape)
+print("Class in the testing image: {}".format(np.unique(test_labels)))
+test_loss, test_acc = model.evaluate(test_images, test_labels)
+print('Total number of testing image: {}'.format(len(test_images)))
+print('Test accuracy:', test_acc)
+
+# 14.) Predict using the model
+classification = model.predict(test_images)
+print('\nDisplaying prediction of the first test input image: {}'.format(classification[0]))
+max_prob_idx = np.argmax(classification[0])
+print('Predicted class: {} -- {}'.format(max_prob_idx, str_class[max_prob_idx]))
+idx = test_labels[0]
+print('True class: {} -- {}'.format(idx, str_class[idx]))
 
 input("Press Enter to exit...")
